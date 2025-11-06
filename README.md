@@ -38,7 +38,7 @@ pip install -r requirements.txt
 
 ### 3. Configure Environment
 
-Create a `.env` file:
+Create a `.env` file for **LOCAL DEVELOPMENT**:
 
 ```bash
 # Discord Bot Configuration
@@ -55,6 +55,11 @@ MONITORED_CHANNELS=channel_id_1,channel_id_2,channel_id_3
 ENABLE_PERSISTENCE=true
 PERSISTENCE_FILE=data/bot_data.json
 ```
+
+**⚠️ IMPORTANT:**
+- For **local development**: Use `COMMAND_PREFIX="!g "` (with quotes)
+- For **Railway deployment**: Use `COMMAND_PREFIX=!g ` (without quotes)
+- Make sure there's a **space after !g** in both cases
 
 **How to get Channel IDs:**
 1. Enable Developer Mode in Discord (Settings → Advanced → Developer Mode)
@@ -124,6 +129,19 @@ All commands start with `!g ` (note the space after !g)
 
 ## Deploy for 24/7 Operation
 
+### 🔑 Environment Variables: Local vs Railway
+
+**The syntax is DIFFERENT for local and Railway!**
+
+| Variable | Local (.env file) | Railway (Variables) |
+|----------|-------------------|---------------------|
+| COMMAND_PREFIX | `COMMAND_PREFIX="!g "` (with quotes) | `COMMAND_PREFIX=!g ` (no quotes) |
+| Other variables | Same | Same |
+
+**Why?** Local uses `python-dotenv` which strips quotes. Railway passes values directly, so quotes become part of the value.
+
+---
+
 ### Option 1: Railway (Recommended - Free Tier)
 
 1. **Initialize Git & Push to GitHub**
@@ -142,20 +160,30 @@ All commands start with `!g ` (note the space after !g)
    - Select your repository
 
 3. **Add Environment Variables in Railway**
-   - Click "Variables" tab
-   - Add these variables:
-     - `DISCORD_TOKEN` = your_token
-     - `GEMINI_API_KEY` = your_key
-     - `COMMAND_PREFIX` = `"!g "`
-     - `MONITORED_CHANNELS` = your_channel_ids
-     - `MESSAGE_BUFFER_SIZE` = `500`
-     - `ENABLE_PERSISTENCE` = `true`
-     - `PERSISTENCE_FILE` = `data/bot_data.json`
-     - `GEMINI_MODEL` = `gemini-2.5-flash`
+
+   **⚠️ IMPORTANT:** Railway syntax is different from local .env file!
+
+   Click "Variables" tab → "Raw Editor" and paste:
+
+   ```
+   DISCORD_TOKEN=your_discord_token_here
+   GEMINI_API_KEY=your_gemini_api_key_here
+   COMMAND_PREFIX=!g
+   GEMINI_MODEL=gemini-2.5-flash
+   MESSAGE_BUFFER_SIZE=500
+   MONITORED_CHANNELS=channel_id_1,channel_id_2,channel_id_3
+   ENABLE_PERSISTENCE=true
+   PERSISTENCE_FILE=data/bot_data.json
+   ```
+
+   **⚠️ CRITICAL:**
+   - Use `COMMAND_PREFIX=!g ` (NO quotes, but WITH space after !g)
+   - If you use quotes, the bot won't recognize commands!
 
 4. **Deploy**
    - Railway will automatically deploy
-   - Check logs to verify bot is running
+   - Check logs - you should see: `Command prefix is: '!g '`
+   - If you see `Command prefix is: '"!g "'` → Remove the quotes from COMMAND_PREFIX
 
 ### Option 2: Docker
 
@@ -199,11 +227,23 @@ sudo systemctl status discord-bot
 
 ## Troubleshooting
 
-**Bot doesn't respond:**
-- ✅ Enable MESSAGE CONTENT INTENT in Discord Developer Portal
-- ✅ Verify command prefix is `"!g "` (with space and quotes)
-- ✅ Check you're in a monitored channel
-- ✅ Verify bot has message permissions
+**Bot doesn't respond to commands:**
+
+1. **Check the logs for command prefix:**
+   - ✅ **Correct:** `Command prefix is: '!g '` (with space, no extra quotes)
+   - ❌ **Wrong:** `Command prefix is: '"!g "'` (has extra quotes)
+
+2. **If running locally:**
+   - ✅ Use `COMMAND_PREFIX="!g "` in .env file (with quotes)
+
+3. **If running on Railway:**
+   - ✅ Use `COMMAND_PREFIX=!g ` in Railway Variables (no quotes, but with space)
+   - ❌ Don't use `COMMAND_PREFIX="!g "` (will add extra quotes)
+
+4. **Other checks:**
+   - ✅ Enable MESSAGE CONTENT INTENT in Discord Developer Portal
+   - ✅ Check you're typing in a monitored channel
+   - ✅ Verify bot has message permissions
 
 **Bot can't see messages:**
 - ✅ Enable MESSAGE CONTENT INTENT
