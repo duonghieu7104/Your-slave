@@ -144,14 +144,7 @@ All commands start with `!g ` (note the space after !g)
 
 ### Option 1: Railway (Recommended - Free Tier)
 
-1. **Initialize Git & Push to GitHub**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git remote add origin your-repo-url
-   git push -u origin main
-   ```
+1. **Fork**
 
 2. **Deploy to Railway**
    - Go to https://railway.app
